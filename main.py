@@ -10,7 +10,7 @@ from torchvision import transforms
 from dataset import ConveyorSimulator
 from metrics import AccuracyMetric, MeanAveragePrecisionMetric, SegmentationIntersectionOverUnionMetric
 from models.classification_network import AlexNetClassification
-from models.detection_network import AlexNetDectection
+from models.detection_network import AlexNetDectection, DetectionCriterion
 from visualizer import Visualizer
 
 TRAIN_VALIDATION_SPLIT = 0.9
@@ -49,7 +49,7 @@ class ConveyorCnnTrainer():
             model = AlexNetClassification().create_model()
             return model
         elif task == 'detection':
-            model = AlexNetDectection().create_model()
+            model = AlexNetDectection()
             return model
         elif task == 'segmentation':
             # À compléter
@@ -62,7 +62,7 @@ class ConveyorCnnTrainer():
             criterion = AlexNetClassification().create_criterion()
             return criterion
         elif task == 'detection':
-            criterion = AlexNetDectection().create_criterion()
+            criterion = DetectionCriterion()
             return criterion
         elif task == 'segmentation':
             # À compléter
@@ -248,16 +248,28 @@ class ConveyorCnnTrainer():
                 Si un 0 est présent à (i, 2), aucune croix n'est présente dans l'image i.
         :return: La valeur de la fonction de coût pour le lot
         """
-        model.train()
-        images = image.to(self._device)
-        labels = class_labels.to(self._device)
-
         optimizer.zero_grad()
-        output = model(images)
-        loss = criterion(output, labels)
-        metric.accumulate(output, labels)
-        loss.backward()
-        optimizer.step()
+
+        if task == "classification":
+            model.train()
+            images = image.to(self._device)
+            labels = class_labels.to(self._device)
+
+            output = model(images)
+            loss = criterion(output, labels)
+            metric.accumulate(output, labels)
+            loss.backward()
+            optimizer.step()
+        elif task == "detection":
+            model.train()
+            images = image.to(self._device)
+            boxes = boxes.to(self._device)
+
+            output = model.forward(images)
+            loss = criterion.forward(output, boxes)
+            metric.accumulate(output, boxes)
+            loss.backward()
+            optimizer.step()
 
         return loss
 
@@ -298,13 +310,22 @@ class ConveyorCnnTrainer():
                 Si un 0 est présent à (i, 2), aucune croix n'est présente dans l'image i.
         :return: La valeur de la fonction de coût pour le lot
         """
-        model.eval()
-        images = image.to(self._device)
-        labels = class_labels.to(self._device)
+        if task == "classification":
+            model.eval()
+            images = image.to(self._device)
+            labels = class_labels.to(self._device)
 
-        output = model(images)
-        loss = criterion(output, labels)
-        metric.accumulate(output, labels)
+            output = model(images)
+            loss = criterion(output, labels)
+            metric.accumulate(output, labels)
+        elif task == "detection":
+            model.eval()
+            images = image.to(self._device)
+            boxes = boxes.to(self._device)
+
+            output = model(images)
+            loss = criterion.forward(output, boxes)
+            metric.accumulate(output, boxes)
 
         return loss
 
