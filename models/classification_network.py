@@ -14,32 +14,29 @@ class AlexNetClassification(nn.Module):
             nn.Conv2d(1, 32, kernel_size=5, stride=1, padding=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=1),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.Conv2d(32, 32, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(64, 128, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 32, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
             nn.Conv2d(32, 32, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 4, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(4, 4, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=1),
         )
-
+        self.flatten = nn.Flatten(1, -1)
         self.classification = nn.Sequential(
-            nn.Linear(10 * 3 * 3, 512),
+            nn.Linear(1936, 64),
             nn.ReLU(inplace=True),
             nn.Dropout(p=0.5),
-            nn.Linear(512, 3),
+            nn.Linear(64, 3),
             nn.Sigmoid()
         )
 
 
     def create_model(self):
-        model = torchvision.models.AlexNet()
-
-        model = nn.Sequential(self.extraction, self.classification)
-
+        model = nn.Sequential(self.extraction, self.flatten, self.classification)
         return model
 
     def create_criterion(self):

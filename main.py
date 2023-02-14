@@ -247,9 +247,18 @@ class ConveyorCnnTrainer():
                 Si un 0 est présent à (i, 2), aucune croix n'est présente dans l'image i.
         :return: La valeur de la fonction de coût pour le lot
         """
+        model.train()
+        images = image.to(self._device)
+        labels = class_labels.to(self._device)
 
-        # À compléter
-        raise NotImplementedError()
+        optimizer.zero_grad()
+        output = model(images)
+        loss = criterion(output, labels)
+        metric.accumulate(output, labels)
+        loss.backward()
+        optimizer.step()
+
+        return loss
 
     def _test_batch(self, task, model, criterion, metric, image, segmentation_target, boxes, class_labels):
         """
@@ -288,9 +297,15 @@ class ConveyorCnnTrainer():
                 Si un 0 est présent à (i, 2), aucune croix n'est présente dans l'image i.
         :return: La valeur de la fonction de coût pour le lot
         """
+        model.eval()
+        images = image.to(self._device)
+        labels = class_labels.to(self._device)
 
-        # À compléter
-        raise NotImplementedError()
+        output = model(images)
+        loss = criterion(output, labels)
+        metric.accumulate(output, labels)
+
+        return loss
 
 
 if __name__ == '__main__':
