@@ -1,11 +1,4 @@
-import os
-
-import matplotlib.pyplot as plt
-import numpy as np
-import torch
 import torch.nn as nn
-import torch.optim as optim
-import torchvision
 
 class AlexNetClassification(nn.Module):
     def __init__(self, num_class=3):

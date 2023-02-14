@@ -10,6 +10,7 @@ from torchvision import transforms
 from dataset import ConveyorSimulator
 from metrics import AccuracyMetric, MeanAveragePrecisionMetric, SegmentationIntersectionOverUnionMetric
 from models.classification_network import AlexNetClassification
+from models.detection_network import AlexNetDectection
 from visualizer import Visualizer
 
 TRAIN_VALIDATION_SPLIT = 0.9
@@ -48,8 +49,8 @@ class ConveyorCnnTrainer():
             model = AlexNetClassification().create_model()
             return model
         elif task == 'detection':
-            # À compléter
-            raise NotImplementedError()
+            model = AlexNetDectection().create_model()
+            return model
         elif task == 'segmentation':
             # À compléter
             raise NotImplementedError()
@@ -61,8 +62,8 @@ class ConveyorCnnTrainer():
             criterion = AlexNetClassification().create_criterion()
             return criterion
         elif task == 'detection':
-            # À compléter
-            raise NotImplementedError()
+            criterion = AlexNetDectection().create_criterion()
+            return criterion
         elif task == 'segmentation':
             # À compléter
             raise NotImplementedError()
