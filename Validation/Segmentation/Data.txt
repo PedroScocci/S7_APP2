@@ -1,0 +1,18 @@
+Epoch: 59
+Train - Average Loss: 24.835798, Intersection Over Union: 0.948398
+Saving new best model
+Validation - Average loss: 66.678636, Intersection Over Union: 0.876260
+
+Epoch: 60
+Train - Average Loss: 23.837056, Intersection Over Union: 0.950843
+Saving new best model
+Validation - Average loss: 65.293125, Intersection Over Union: 0.879215
+Do you want ot test? (y/n):y
+Test data :  100
+Test - Average loss: 66.745969, Intersection Over Union: 0.878539
+
+
+HYPERPARAMÈTRES:
+Hidden: 13
+Batch Size: 16
+Learning rate: 0.00075

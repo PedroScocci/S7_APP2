@@ -12,6 +12,7 @@ from metrics import AccuracyMetric, MeanAveragePrecisionMetric, SegmentationInte
 from models.classification_network import AlexNetClassification
 from models.detection_network import AlexNetDectection, DetectionCriterion
 from visualizer import Visualizer
+from models.segmentation_network import UNet
 
 TRAIN_VALIDATION_SPLIT = 0.9
 CLASS_PROBABILITY_THRESHOLD = 0.5
@@ -52,8 +53,9 @@ class ConveyorCnnTrainer():
             model = AlexNetDectection()
             return model
         elif task == 'segmentation':
-            # À compléter
-            raise NotImplementedError()
+            seg_model = UNet(input_channels=1, n_classes=SEGMENTATION_BACKGROUND_CLASS+1)
+            return seg_model
+            #raise NotImplementedError()
         else:
             raise ValueError('Not supported task')
 
@@ -65,8 +67,10 @@ class ConveyorCnnTrainer():
             criterion = DetectionCriterion()
             return criterion
         elif task == 'segmentation':
-            # À compléter
-            raise NotImplementedError()
+            weights = [1.0, 1.0, 1.0, 0.1]
+            class_weights = torch.FloatTensor(weights).to(self._device)
+            return torch.nn.CrossEntropyLoss(reduction='sum', weight=class_weights)
+            #raise NotImplementedError()
         else:
             raise ValueError('Not supported task')
 
@@ -250,11 +254,11 @@ class ConveyorCnnTrainer():
         """
         optimizer.zero_grad()
 
+            labels = class_labels.to(self._device)
         if task == "classification":
             model.train()
             images = image.to(self._device)
             labels = class_labels.to(self._device)
-
             output = model(images)
             loss = criterion(output, labels)
             metric.accumulate(output, labels)
@@ -270,9 +274,17 @@ class ConveyorCnnTrainer():
             metric.accumulate(output, boxes)
             loss.backward()
             optimizer.step()
-
+        elif task == 'segmentation':
+            prediction = model.forward(image)
+            loss = criterion(prediction, segmentation_target)
+            loss.backward()
+            optimizer.step()
+            metric.accumulate(prediction, segmentation_target)
+        else:
+            raise ValueError('Not supported task')
+        
         return loss
-
+        
     def _test_batch(self, task, model, criterion, metric, image, segmentation_target, boxes, class_labels):
         """
         Méthode qui effectue une passe de validation ou de test sur un lot de données.
@@ -310,8 +322,9 @@ class ConveyorCnnTrainer():
                 Si un 0 est présent à (i, 2), aucune croix n'est présente dans l'image i.
         :return: La valeur de la fonction de coût pour le lot
         """
+        model.eval()
+        
         if task == "classification":
-            model.eval()
             images = image.to(self._device)
             labels = class_labels.to(self._device)
 
@@ -322,14 +335,17 @@ class ConveyorCnnTrainer():
             model.eval()
             images = image.to(self._device)
             boxes = boxes.to(self._device)
-
             output = model(images)
             loss = criterion.forward(output, boxes)
             metric.accumulate(output, boxes)
+        elif task == 'segmentation':
+            prediction = model.forward(image)
+            loss = criterion(prediction, segmentation_target)
+            metric.accumulate(prediction, segmentation_target)
+        else:
+            raise ValueError('Not supported task')
 
         return loss
-
-
 if __name__ == '__main__':
     #  Settings
     parser = argparse.ArgumentParser(description='Conveyor CNN')
