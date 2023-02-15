@@ -254,7 +254,6 @@ class ConveyorCnnTrainer():
         """
         optimizer.zero_grad()
 
-            labels = class_labels.to(self._device)
         if task == "classification":
             model.train()
             images = image.to(self._device)
