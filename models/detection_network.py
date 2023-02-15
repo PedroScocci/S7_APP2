@@ -61,8 +61,18 @@ class DetectionCriterion(nn.Module):
         self.criterionMSE = nn.MSELoss()
 
     def forward(self, output, target):
-        xyLoss = self.criterionBCE(output, target)
-        whLoss = self.criterionMSE(output, target)
-        criterion = 2*xyLoss + 5*whLoss + 0.5
+        targetObject = (target[:,:,0] == 1.0)*1.0
+        targetNoObject = (target[:,:,0] == 0.0)*1.0
+
+        targetClasse = torch.zeros((len(target), 3, 3))
+        for i in range(len(target)):
+            for j in range(len(target[0])):
+                targetClasse[i, j, int(target[i, j, -1])] = 1
+
+        xywhLoss = self.criterionMSE(output[:,:,1:4], target[:,:,1:4])
+        #classLoss = self.criterionBCE(output[:,:,:3], targetClasse)
+        objectLoss = self.criterionBCE(output[:,:,0], targetObject)
+        noObjectLoss = self.criterionBCE(output[:,:,0], targetNoObject)
+        criterion = 5*xywhLoss + 0.5*noObjectLoss + objectLoss #classLoss + 5*xywhLoss + 0.5*noObjectLoss + objectLoss
         return criterion
 
