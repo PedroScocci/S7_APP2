@@ -70,7 +70,6 @@ class ConveyorCnnTrainer():
             weights = [1.0, 1.0, 1.0, 0.1]
             class_weights = torch.FloatTensor(weights).to(self._device)
             return torch.nn.CrossEntropyLoss(reduction='sum', weight=class_weights)
-            #raise NotImplementedError()
         else:
             raise ValueError('Not supported task')
 
