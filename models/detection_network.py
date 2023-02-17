@@ -50,6 +50,8 @@ class AlexNetDectection(nn.Module):
         x = self.relu4(x)
         x = self.conv5(x)
         x = self.batchNorm5(x)
+        x = self.relu5(x)
+        x = self.maxpool5(5)
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = self.relu6(x)
