@@ -36,5 +36,5 @@ class AlexNetClassification(nn.Module):
         return model
 
     def create_criterion(self):
-        criterion = nn.BCELoss()
+        criterion = nn.BCELoss(reduction="sum")
         return criterion
