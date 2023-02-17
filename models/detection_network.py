@@ -24,8 +24,6 @@ class AlexNetDectection(nn.Module):
         self.conv5 = nn.Conv2d(6*self.hidden, 2*self.hidden, kernel_size=3, padding=1)
         self.batchNorm5 = nn.BatchNorm2d(2 * self.hidden)
         self.relu5 = nn.ReLU()
-        self.maxpool5 = nn.MaxPool2d(kernel_size=3, stride=1)
-
         self.fc1 = nn.Linear(1152, 3*self.hidden)
         self.relu6 = nn.ReLU()
         self.fc2 = nn.Linear(3*self.hidden, 3*self.hidden)
@@ -51,7 +49,6 @@ class AlexNetDectection(nn.Module):
         x = self.conv5(x)
         x = self.batchNorm5(x)
         x = self.relu5(x)
-        x = self.maxpool5(5)
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = self.relu6(x)
