@@ -55,7 +55,6 @@ class ConveyorCnnTrainer():
         elif task == 'segmentation':
             seg_model = UNet(input_channels=1, n_classes=SEGMENTATION_BACKGROUND_CLASS+1)
             return seg_model
-            #raise NotImplementedError()
         else:
             raise ValueError('Not supported task')
 
