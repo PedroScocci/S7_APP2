@@ -7,39 +7,55 @@ class AlexNetDectection(nn.Module):
     def __init__(self):
         super(AlexNetDectection, self).__init__()
         self.hidden = 16
-        self.extraction = nn.Sequential(
-            nn.Conv2d(1, 4*self.hidden, kernel_size=5, stride=2, padding=1),
-            nn.BatchNorm2d(4*self.hidden),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3, stride=1),
-            nn.Conv2d(4*self.hidden, 6*self.hidden, kernel_size=5, padding=1, stride=2),
-            nn.BatchNorm2d(6 * self.hidden),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3, stride=1),
-            nn.Conv2d(6*self.hidden, 6*self.hidden, kernel_size=3, padding=1),
-            nn.BatchNorm2d(6 * self.hidden),
-            nn.ReLU(),
-            nn.Conv2d(6*self.hidden, 6*self.hidden, kernel_size=3, padding=1),
-            nn.BatchNorm2d(6 * self.hidden),
-            nn.ReLU(),
-            nn.Conv2d(6*self.hidden, 4*self.hidden, kernel_size=3, padding=1),
-            nn.BatchNorm2d(4 * self.hidden),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=3, stride=1),
-        )
-        self.classi_detect = nn.Sequential(
-            nn.Linear(3136, 4*self.hidden),
-            nn.ReLU(inplace=True),
-            nn.Linear(4*self.hidden, 3*self.hidden),
-            nn.ReLU(inplace=True),
-            nn.Linear(3*self.hidden, 3*7),
-        )
+        self.conv1 = nn.Conv2d(1, 2*self.hidden, kernel_size=5, stride=2, padding=1)
+        self.batchNorm1 = nn.BatchNorm2d(2*self.hidden)
+        self.relu1 = nn.ReLU()
+        self.maxpool1 = nn.MaxPool2d(kernel_size=2, stride=1)
+        self.conv2 = nn.Conv2d(2*self.hidden, 6*self.hidden, kernel_size=5, padding=1, stride=2)
+        self.batchNorm2 = nn.BatchNorm2d(6 * self.hidden)
+        self.relu2 = nn.ReLU()
+        self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv3 = nn.Conv2d(6*self.hidden, 6*self.hidden, kernel_size=3, padding=1)
+        self.batchNorm3 = nn.BatchNorm2d(6 * self.hidden)
+        self.relu3 = nn.ReLU()
+        self.conv4 = nn.Conv2d(6*self.hidden, 6*self.hidden, kernel_size=3, padding=1)
+        self.batchNorm4 = nn.BatchNorm2d(6 * self.hidden)
+        self.relu4 = nn.ReLU()
+        self.conv5 = nn.Conv2d(6*self.hidden, 2*self.hidden, kernel_size=3, padding=1)
+        self.batchNorm5 = nn.BatchNorm2d(2 * self.hidden)
+        self.relu5 = nn.ReLU()
+        self.maxpool5 = nn.MaxPool2d(kernel_size=3, stride=1)
+
+        self.fc1 = nn.Linear(1152, 3*self.hidden)
+        self.relu6 = nn.ReLU()
+        self.fc2 = nn.Linear(3*self.hidden, 3*self.hidden)
+        self. relu7 = nn.ReLU()
+        self.fc3 = nn.Linear(3*self.hidden, 3*7)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, input):
-        x = self.extraction(input)
+        x = self.conv1(input)
+        x = self.batchNorm1(x)
+        x = self.relu1(x)
+        x = self.maxpool1(x)
+        x = self.conv2(x)
+        x = self.batchNorm2(x)
+        x = self.relu2(x)
+        x = self.maxpool2(x)
+        x = self.conv3(x)
+        x = self.batchNorm3(x)
+        x = self.relu3(x)
+        x = self.conv4(x)
+        x = self.batchNorm4(x)
+        x = self.relu4(x)
+        x = self.conv5(x)
+        x = self.batchNorm5(x)
         x = torch.flatten(x, 1)
-        x = self.classi_detect(x)
+        x = self.fc1(x)
+        x = self.relu6(x)
+        x = self.fc2(x)
+        x = self.relu7(x)
+        x = self.fc3(x)
         x = self.sigmoid(x)
 
         output = x.reshape(len(x), 3, 7)
